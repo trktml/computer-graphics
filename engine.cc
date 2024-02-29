@@ -29,7 +29,11 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 int main(int argc, char const *argv[])
 {
         // for vscode debugging purposes, it gives "debug.ini" as first argument
-        const auto [argc, argv] = debug_tools::GET_DEBUG_ARGUMENTS(argc, argv);
+        int debug_argc;
+        const char **debug_argv;
+        std::tie(debug_argc, debug_argv) = debug_tools::GET_DEBUG_ARGUMENTS(argc, argv);
+        argc = debug_argc;
+        argv = debug_argv;
 
         int retVal = 0;
         try
