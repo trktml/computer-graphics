@@ -1,8 +1,7 @@
-
-
 #include "easy_image.h"
 #include "ini_configuration.h"
 #include "debug_tools.h"
+#include "my_utils.h"
 
 #include <fstream>
 #include <iostream>
@@ -84,6 +83,25 @@ int main(int argc, char const *argv[])
                                 {
                                         fileName = fileName.substr(0, pos) + ".bmp";
                                 }
+                                std::string::size_type slash = fileName.rfind('/');
+                                if (slash != std::string::npos)
+                                {
+                                        fileName = "./outputs/" + fileName.substr(slash + 1);
+                                }
+
+                                size_t folder_pos = fileName.find_last_of('/');
+                                if (folder_pos != std::string::npos)
+                                {
+                                        // Klasör yolunu alıyoruz.
+                                        std::string directory = fileName.substr(0, folder_pos);
+
+                                        // Klasörü oluşturuyoruz (eğer daha önce oluşturulmadıysa).
+                                        if (!createDirectory(directory))
+                                        {
+                                                return 1; // Klasör oluşturma başarısız olduğunda programı sonlandırıyoruz.
+                                        }
+                                }
+
                                 try
                                 {
                                         std::ofstream f_out(fileName.c_str(), std::ios::trunc | std::ios::out | std::ios::binary);

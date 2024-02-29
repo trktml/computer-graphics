@@ -13,7 +13,7 @@ namespace debug_tools
 
 #if DEBUG_MODE
         int const default_argc = 2;
-        char const *default_args[] = {argv[0], "debug.ini"};
+        char const *default_args[] = {argv[0], "./ini/debug.ini"};
         if (argc == 1) // no arguments were passed
         {
             // do things for no arguments
