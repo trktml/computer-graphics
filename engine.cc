@@ -6,8 +6,6 @@
 #include <stdexcept>
 #include <string>
 
-
-
 img::EasyImage generate_image(const ini::Configuration &configuration)
 {
 	return img::EasyImage();
