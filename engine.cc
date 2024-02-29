@@ -92,14 +92,11 @@ int main(int argc, char const *argv[])
                                 size_t folder_pos = fileName.find_last_of('/');
                                 if (folder_pos != std::string::npos)
                                 {
-                                        // Klasör yolunu alıyoruz.
+                                        // We get the folder path.
                                         std::string directory = fileName.substr(0, folder_pos);
 
-                                        // Klasörü oluşturuyoruz (eğer daha önce oluşturulmadıysa).
-                                        if (!createDirectory(directory))
-                                        {
-                                                return 1; // Klasör oluşturma başarısız olduğunda programı sonlandırıyoruz.
-                                        }
+                                        // We create the folder (if it has not been created before).
+                                        createDirectory(directory);
                                 }
 
                                 try
