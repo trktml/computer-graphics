@@ -1,7 +1,0 @@
-/mnt/c/storage/school/Computer Graphics/02 - Opdracht 2D L-Systemen/code/CMakeFiles/engine.dir
-/mnt/c/storage/school/Computer Graphics/02 - Opdracht 2D L-Systemen/code/CMakeFiles/edit_cache.dir
-/mnt/c/storage/school/Computer Graphics/02 - Opdracht 2D L-Systemen/code/CMakeFiles/rebuild_cache.dir
-/mnt/c/storage/school/Computer Graphics/02 - Opdracht 2D L-Systemen/code/CMakeFiles/list_install_components.dir
-/mnt/c/storage/school/Computer Graphics/02 - Opdracht 2D L-Systemen/code/CMakeFiles/install.dir
-/mnt/c/storage/school/Computer Graphics/02 - Opdracht 2D L-Systemen/code/CMakeFiles/install/local.dir
-/mnt/c/storage/school/Computer Graphics/02 - Opdracht 2D L-Systemen/code/CMakeFiles/install/strip.dir
