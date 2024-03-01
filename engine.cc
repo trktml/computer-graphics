@@ -1,39 +1,60 @@
-#include "easy_image.h"
-#include "ini_configuration.h"
-#include "debug_tools.h"
-#include "my_utils.h"
-
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <string>
+#include "utils.h"
 
 img::EasyImage generate_image(const ini::Configuration &configuration)
 {
-        int width = configuration["ImageProperties"]["width"].as_int_or_die();
-        int height = configuration["ImageProperties"]["height"].as_int_or_die();
+        // get the file name from the configuration
 
-        img::EasyImage image(width, height);
-        for (unsigned int i = 0; i < width; i++)
+        // [General]
+        // type = "2DLSystem"
+        // size = 1000
+        // backgroundcolor = (0.0, 0.0, 0.0)
+        int size = configuration["General"]["size"].as_int_or_die();
+
+        ini::DoubleTuple backgroundcolor = configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
+
+        // [2DLSystem]
+        // inputfile = "Koch.L2D"
+        // color = (0.5, 1, 0)
+
+        // get input file from configuration
+        std::string lsystem_input_file_name = configuration["2DLSystem"]["inputfile"];
+        lsystem_input_file_name = "./inputfiles/" + lsystem_input_file_name;
+
+        // get color from configuration and convert it to a vector of doubles
+        ini::DoubleTuple color = configuration["2DLSystem"]["color"].as_double_tuple_or_die();
+
+        // read the LSytem2D file and forward it to l2d
+        std::ifstream lsystem_file(lsystem_input_file_name);
+        if (lsystem_file.peek() == std::istream::traits_type::eof())
         {
-                for (unsigned int j = 0; j < height; j++)
-                {
-                        image(i, j) = img::Color(i % 256, j % 256, (i + j) % 256);
-                }
+                std::cout << "Ini file appears empty. Does '" << lsystem_input_file_name << "' exist?" << std::endl;
         }
 
+        LParser::LSystem2D l2d;
+
+        lsystem_file >> l2d;
+        lsystem_file.close();
+
+        img::EasyImage image(size, size, img::Color(backgroundcolor.at(0), backgroundcolor.at(1), backgroundcolor.at(2)));
+
+        // l2d.get_alphabet() is a set of strings
+        // print values
+        const std::set<char> alphabet = l2d.get_alphabet();
+        std::cout << "Alphabet: " << std::endl;
+        for (char s : alphabet)
+        {
+                std::cout << s << std::endl;
+        }
+
+        for (size_t i = 0; i < 200; i++)
+                image.draw_line(i, 0, size - 1, size - i - 1, img::Color(255, 0, 0));
+        for (size_t i = 0; i < 200; i++)
+                image.draw_line(0, i, size - i - 1, size - 1, img::Color(0, 255, 0));
         return image;
 }
 
 int main(int argc, char const *argv[])
 {
-        // for vscode debugging purposes, it gives "debug.ini" as first argument
-        int debug_argc;
-        const char **debug_argv;
-        std::tie(debug_argc, debug_argv) = debug_tools::GET_DEBUG_ARGUMENTS(argc, argv);
-        argc = debug_argc;
-        argv = debug_argv;
-
         int retVal = 0;
         try
         {
@@ -103,6 +124,7 @@ int main(int argc, char const *argv[])
                                 {
                                         std::ofstream f_out(fileName.c_str(), std::ios::trunc | std::ios::out | std::ios::binary);
                                         f_out << image;
+                                        f_out.close();
                                 }
                                 catch (std::exception &ex)
                                 {
