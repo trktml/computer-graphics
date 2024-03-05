@@ -1,4 +1,4 @@
-#include "read_ini_and_lsystem.h"
+#include "read_lsystem_from_file.h"
 
 LParser::LSystem2D read_lsystem_from_file(const ini::Configuration &configuration)
 {

@@ -8,13 +8,12 @@
 #include <cmath>
 #include <tuple>
 
-// my headers
-#include "my_utils.h"
-
+// headers
 #include "easy_image.h"
 #include "ini_configuration.h"
 #include "l_parser.h"
-#include "read_ini_and_lsystem.h"
+#include "create_directory.h"
+#include "read_lsystem_from_file.h"
 
 // types
 #include "line2d.h"
