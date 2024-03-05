@@ -14,14 +14,19 @@ set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${OWN_GXX_FLAGS}")
 ############################################################
 # List all sources
 ############################################################
-set(utilsfolder "utils")
-include_directories("${PROJECT_SOURCE_DIR}/${utilsfolder}")
+include_directories("${PROJECT_SOURCE_DIR}/src/utils")
+include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/src/types")
 
-FILE(GLOB source_files ${utilsfolder}/*.cc)
+FILE(GLOB_RECURSE source_files ${PROJECT_SOURCE_DIR}/**.cc)
+FILE(GLOB_RECURSE header_files ${PROJECT_SOURCE_DIR}/**.h)
+
+message(STATUS "source_files=${source_files}")
+message(STATUS "header_files=${header_files}")
 
 set(engine_sources
 	${source_files}
-	engine.cc
+	${header_files}
 )
 
 ############################################################
@@ -29,4 +34,5 @@ set(engine_sources
 ############################################################
 set(exe_name "engine")
 add_executable( ${exe_name} ${engine_sources} )
+
 install( TARGETS ${exe_name} DESTINATION ${PROJECT_SOURCE_DIR}/ )

@@ -1,7 +1,7 @@
 MAKEFLAGS += --silent
 
 
-default: cmake clear make clear run
+default: cmake clear make copy_to_main_dir clear
 
 
 cmake:
@@ -10,8 +10,8 @@ clear:
 	clear
 make:
 	cd build && make
-run:
-	./build/engine
+copy_to_main_dir:
+	rm -rf ./engine && cp ./build/engine ./engine
 
 
 clean:
