@@ -1,24 +1,101 @@
-#include "easy_image.h"
-#include "ini_configuration.h"
-#include "debug_tools.h"
-#include "my_utils.h"
 
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <string>
+#include "headers.h"
+
+void printLSystemInfo(const LParser::LSystem2D &l2d)
+{
+        const std::string initiator = l2d.get_initiator();
+        std::cout << "İnitiator: " << std::endl;
+        std::cout << initiator << std::endl;
+
+        const std::set<char> &alphabet = l2d.get_alphabet();
+        std::cout << "Alphabet: " << std::endl;
+        for (const auto &s : alphabet)
+        {
+                std::cout << s << std::endl;
+        }
+}
 
 img::EasyImage generate_image(const ini::Configuration &configuration)
 {
-        int width = configuration["ImageProperties"]["width"].as_int_or_die();
-        int height = configuration["ImageProperties"]["height"].as_int_or_die();
+        LParser::LSystem2D l2d = read_lsystem_from_file(configuration);
 
-        img::EasyImage image(width, height);
-        for (unsigned int i = 0; i < width; i++)
+        int size = configuration["General"]["size"].as_int_or_die();
+
+        ini::DoubleTuple backgroundcolor = configuration["General"]["backgroundcolor"].as_double_tuple_or_die();
+
+        ini::DoubleTuple color = configuration["2DLSystem"]["color"].as_double_tuple_or_die();
+
+        img::EasyImage image(size, size, img::Color(backgroundcolor.at(0), backgroundcolor.at(1), backgroundcolor.at(2)));
+
+        printLSystemInfo(l2d);
+
+        std::string lsystem_string = l2d.get_initiator();
+        for (size_t i = 0; i < l2d.get_nr_iterations(); i++)
         {
-                for (unsigned int j = 0; j < height; j++)
+                std::string current_lsystem_string = lsystem_string;
+                lsystem_string = "";
+                for (char c : current_lsystem_string)
                 {
-                        image(i, j) = img::Color(i % 256, j % 256, (i + j) % 256);
+                        switch (c)
+                        {
+                        case '+':
+                                lsystem_string += "+";
+                                break;
+                        case '-':
+                                lsystem_string += "-";
+                                break;
+                        case '[':
+                                lsystem_string += "[";
+                                break;
+                        case ']':
+                                lsystem_string += "]";
+                                break;
+                        case '(':
+                                lsystem_string += "(";
+                                break;
+                        case ')':
+                                lsystem_string += ")";
+                                break;
+                        default:
+                                lsystem_string += l2d.get_replacement(c);
+                                break;
+                        }
+                }
+        }
+        std::cout << "lsystem_string: " << lsystem_string << " ";
+
+        double startingAngle = l2d.get_starting_angle();
+
+        const int fixed_step = 15;
+        double angle = startingAngle;
+
+        Point2D point(600, 10);
+        Line2D line;
+        for (const char c : lsystem_string)
+        {
+                switch (c)
+                {
+                case '+':
+                        angle += l2d.get_angle();
+                        break;
+                case '-':
+                        angle -= l2d.get_angle();
+                        break;
+                case '[':
+                        break;
+                case ']':
+                        break;
+                default:
+                        double x = point.x + std::cos((int(angle) % 360) * M_PI / 180) * fixed_step;
+                        double y = point.y + std::sin((int(angle) % 360) * M_PI / 180) * fixed_step;
+                        Point2D newPoint(x, y);
+                        line.p1 = point;
+                        line.p2 = newPoint;
+
+                        std::cout << "p1.x: " << line.p1.x << ", p1.y: " << line.p1.y << ", p2.x: " << line.p2.x << ", p2.y: " << line.p2.y << std::endl;
+                        image.draw_line(abs(line.p1.x), abs(line.p1.y), abs(line.p2.x), abs(line.p2.y), img::Color(color.at(0), color.at(1), color.at(2)));
+                        point = newPoint;
+                        break;
                 }
         }
 
@@ -27,13 +104,6 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 
 int main(int argc, char const *argv[])
 {
-        // for vscode debugging purposes, it gives "debug.ini" as first argument
-        int debug_argc;
-        const char **debug_argv;
-        std::tie(debug_argc, debug_argv) = debug_tools::GET_DEBUG_ARGUMENTS(argc, argv);
-        argc = debug_argc;
-        argv = debug_argv;
-
         int retVal = 0;
         try
         {
@@ -89,20 +159,21 @@ int main(int argc, char const *argv[])
                                         fileName = "./outputs/" + fileName.substr(slash + 1);
                                 }
 
-                                size_t folder_pos = fileName.find_last_of('/');
-                                if (folder_pos != std::string::npos)
-                                {
-                                        // We get the folder path.
-                                        std::string directory = fileName.substr(0, folder_pos);
-
-                                        // We create the folder (if it has not been created before).
-                                        createDirectory(directory);
-                                }
-
                                 try
                                 {
+                                        size_t folder_pos = fileName.find_last_of('/');
+                                        if (folder_pos != std::string::npos)
+                                        {
+                                                // We get the folder path.
+                                                std::string directory = fileName.substr(0, folder_pos);
+
+                                                // We create the folder (if it has not been created before).
+                                                createDirectory(directory);
+                                        }
+
                                         std::ofstream f_out(fileName.c_str(), std::ios::trunc | std::ios::out | std::ios::binary);
                                         f_out << image;
+                                        f_out.close();
                                 }
                                 catch (std::exception &ex)
                                 {
