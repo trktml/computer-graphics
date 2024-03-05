@@ -161,7 +161,7 @@ int main(int argc, char const *argv[])
 
                                 try
                                 {
-                                        size_t folder_pos = fileName.find_last_of('/');
+                                        size_t folder_pos = fileName.find_last_of('/'); // TO-DO not working on windows
                                         if (folder_pos != std::string::npos)
                                         {
                                                 // We get the folder path.

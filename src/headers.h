@@ -1,3 +1,5 @@
+#define _USE_MATH_DEFINES
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -7,6 +9,10 @@
 #include <algorithm>
 #include <cmath>
 #include <tuple>
+
+#ifdef _WIN32
+#include <direct.h>
+#endif
 
 // headers
 #include "easy_image.h"
