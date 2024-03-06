@@ -70,3 +70,55 @@ bool createDirectory(const std::string &path)
 #endif
     return true;
 }
+
+void printLSystemInfo(const LParser::LSystem2D &l2d)
+{
+    const std::string initiator = l2d.get_initiator();
+    std::cout << "İnitiator: " << std::endl;
+    std::cout << initiator << std::endl;
+
+    const std::set<char> &alphabet = l2d.get_alphabet();
+    std::cout << "Alphabet: " << std::endl;
+    for (const auto &s : alphabet)
+    {
+        std::cout << s << std::endl;
+    }
+}
+
+std::string get_lsystem_string_after_iterations(LParser::LSystem2D &l2d)
+{
+    std::string lsystem_string;
+    for (size_t i = 0; i < l2d.get_nr_iterations(); i++)
+    {
+        std::string current_lsystem_string = lsystem_string;
+        lsystem_string = "";
+        for (char c : current_lsystem_string)
+        {
+            switch (c)
+            {
+            case '+':
+                lsystem_string += "+";
+                break;
+            case '-':
+                lsystem_string += "-";
+                break;
+            case '[':
+                lsystem_string += "[";
+                break;
+            case ']':
+                lsystem_string += "]";
+                break;
+            case '(':
+                lsystem_string += "(";
+                break;
+            case ')':
+                lsystem_string += ")";
+                break;
+            default:
+                lsystem_string += l2d.get_replacement(c);
+                break;
+            }
+        }
+    }
+    return lsystem_string;
+}

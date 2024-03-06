@@ -11,6 +11,7 @@
 #include <tuple>
 #include <filesystem>
 #include <stack>
+#include <list>
 
 #ifdef _WIN32
 #include <direct.h>

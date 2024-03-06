@@ -1,19 +1,4 @@
-
 #include "headers.h"
-
-void printLSystemInfo(const LParser::LSystem2D &l2d)
-{
-        const std::string initiator = l2d.get_initiator();
-        std::cout << "İnitiator: " << std::endl;
-        std::cout << initiator << std::endl;
-
-        const std::set<char> &alphabet = l2d.get_alphabet();
-        std::cout << "Alphabet: " << std::endl;
-        for (const auto &s : alphabet)
-        {
-                std::cout << s << std::endl;
-        }
-}
 
 img::EasyImage generate_image(const ini::Configuration &configuration)
 {
@@ -29,49 +14,16 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 
         printLSystemInfo(l2d);
 
-        std::string lsystem_string = l2d.get_initiator();
-        for (size_t i = 0; i < l2d.get_nr_iterations(); i++)
-        {
-                std::string current_lsystem_string = lsystem_string;
-                lsystem_string = "";
-                for (char c : current_lsystem_string)
-                {
-                        switch (c)
-                        {
-                        case '+':
-                                lsystem_string += "+";
-                                break;
-                        case '-':
-                                lsystem_string += "-";
-                                break;
-                        case '[':
-                                lsystem_string += "[";
-                                break;
-                        case ']':
-                                lsystem_string += "]";
-                                break;
-                        case '(':
-                                lsystem_string += "(";
-                                break;
-                        case ')':
-                                lsystem_string += ")";
-                                break;
-                        default:
-                                lsystem_string += l2d.get_replacement(c);
-                                break;
-                        }
-                }
-        }
-        std::cout << "lsystem_string: " << lsystem_string << " ";
-
-        double startingAngle = l2d.get_starting_angle();
+        std::string lsystem_string = get_lsystem_string_after_iterations(l2d);
 
         const int fixed_step = 5;
-        double angle = startingAngle;
+        double angle = l2d.get_starting_angle();
 
         std::stack<Point2D> point_stack;
 
-        Point2D point(600, 600);
+        int x_max = 0, x_min = std::numeric_limits<int>::max(), y_max = 0, y_min = std::numeric_limits<int>::max();
+
+        Point2D point(0, 0);
         Line2D line;
         for (const char c : lsystem_string)
         {
@@ -96,13 +48,73 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
                         line.p1 = point;
                         line.p2 = newPoint;
 
-                        std::cout << "p1.x: " << line.p1.x << ", p1.y: " << line.p1.y << ", p2.x: " << line.p2.x << ", p2.y: " << line.p2.y << std::endl;
-                        if (l2d.draw(c))
-                        {
-                                image.draw_line(abs(line.p1.x), abs(line.p1.y), abs(line.p2.x), abs(line.p2.y), img::Color(color.at(0), color.at(1), color.at(2)));
-                        }
+                        x_max = std::max(x_max, static_cast<int>(x));
+                        x_min = std::min(x_min, static_cast<int>(x));
+                        y_max = std::max(y_max, static_cast<int>(y));
+                        y_min = std::min(y_min, static_cast<int>(y));
 
                         point = newPoint;
+                        break;
+                }
+        }
+
+        int image_width = x_max - x_min + 1;
+        int image_height = y_max - y_min + 1;
+
+        float scale_factor = 1.0f;
+        if (image_width > 1500 || image_height > 1500)
+        {
+                float max_dimension = std::max(image_width, image_height);
+                scale_factor = 1500.0f / max_dimension;
+        }
+        scale_factor *= 0.95f;
+
+        int x_offset = -x_min;
+        int y_offset = -y_min;
+
+        point.x = 0;
+        point.y = 0;
+
+        angle = l2d.get_starting_angle();
+        for (const char c : lsystem_string)
+        {
+                switch (c)
+                {
+                case '+':
+                        angle += l2d.get_angle();
+                        break;
+                case '-':
+                        angle -= l2d.get_angle();
+                        break;
+                case '(':
+                        point_stack.push(point);
+                        break;
+                case ')':
+                        point = point_stack.top();
+                        break;
+                default:
+                        double x = point.x + std::cos((int(angle) % 360) * M_PI / 180) * fixed_step;
+                        double y = point.y + std::sin((int(angle) % 360) * M_PI / 180) * fixed_step;
+
+                        Point2D newPoint(x + x_offset, y + y_offset);
+
+                        line.p1.x = point.x + x_offset;
+                        line.p1.y = point.y + y_offset;
+
+                        line.p2 = newPoint;
+
+                        if (l2d.draw(c))
+                        {
+                                int scaled_x1 = static_cast<int>((line.p1.x) * scale_factor);
+                                int scaled_y1 = static_cast<int>((line.p1.y) * scale_factor);
+                                int scaled_x2 = static_cast<int>((line.p2.x) * scale_factor);
+                                int scaled_y2 = static_cast<int>((line.p2.y) * scale_factor);
+
+                                image.draw_line(scaled_x1, scaled_y1, scaled_x2, scaled_y2, img::Color(color.at(0), color.at(1), color.at(2)));
+                        }
+
+                        point.x = newPoint.x;
+                        point.y = newPoint.y;
                         break;
                 }
         }
