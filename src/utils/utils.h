@@ -1,5 +1,3 @@
-#define _USE_MATH_DEFINES
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -10,17 +8,16 @@
 #include <cmath>
 #include <tuple>
 #include <filesystem>
-#include <stack>
 
 #ifdef _WIN32
 #include <direct.h>
 #endif
 
-// headers
-#include "easy_image.h"
-#include "ini_configuration.h"
 #include "l_parser.h"
-#include "utils.h"
+#include "ini_configuration.h"
 
-// types
-#include "types.h"
+LParser::LSystem2D read_lsystem_from_file(const ini::Configuration &configuration);
+
+bool fix_file_path(std::string &filePath);
+
+bool createDirectory(const std::string &path);

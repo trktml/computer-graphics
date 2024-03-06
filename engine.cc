@@ -66,10 +66,12 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
 
         double startingAngle = l2d.get_starting_angle();
 
-        const int fixed_step = 15;
+        const int fixed_step = 5;
         double angle = startingAngle;
 
-        Point2D point(600, 10);
+        std::stack<Point2D> point_stack;
+
+        Point2D point(600, 600);
         Line2D line;
         for (const char c : lsystem_string)
         {
@@ -81,9 +83,11 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
                 case '-':
                         angle -= l2d.get_angle();
                         break;
-                case '[':
+                case '(':
+                        point_stack.push(point);
                         break;
-                case ']':
+                case ')':
+                        point = point_stack.top();
                         break;
                 default:
                         double x = point.x + std::cos((int(angle) % 360) * M_PI / 180) * fixed_step;
@@ -93,7 +97,11 @@ img::EasyImage generate_image(const ini::Configuration &configuration)
                         line.p2 = newPoint;
 
                         std::cout << "p1.x: " << line.p1.x << ", p1.y: " << line.p1.y << ", p2.x: " << line.p2.x << ", p2.y: " << line.p2.y << std::endl;
-                        image.draw_line(abs(line.p1.x), abs(line.p1.y), abs(line.p2.x), abs(line.p2.y), img::Color(color.at(0), color.at(1), color.at(2)));
+                        if (l2d.draw(c))
+                        {
+                                image.draw_line(abs(line.p1.x), abs(line.p1.y), abs(line.p2.x), abs(line.p2.y), img::Color(color.at(0), color.at(1), color.at(2)));
+                        }
+
                         point = newPoint;
                         break;
                 }
@@ -122,6 +130,8 @@ int main(int argc, char const *argv[])
                         ini::Configuration conf;
                         try
                         {
+                                fix_file_path(fileName);
+
                                 std::ifstream fin(fileName);
                                 if (fin.peek() == std::istream::traits_type::eof())
                                 {
@@ -134,6 +144,12 @@ int main(int argc, char const *argv[])
                         catch (ini::ParseException &ex)
                         {
                                 std::cerr << "Error parsing file: " << fileName << ": " << ex.what() << std::endl;
+                                retVal = 1;
+                                continue;
+                        }
+                        catch (std::exception &ex)
+                        { // Catch other standard library exceptions
+                                std::cerr << "Caught exception: " << ex.what() << std::endl;
                                 retVal = 1;
                                 continue;
                         }
@@ -161,6 +177,7 @@ int main(int argc, char const *argv[])
 
                                 try
                                 {
+                                        fix_file_path(fileName);
                                         size_t folder_pos = fileName.find_last_of('/'); // TO-DO not working on windows
                                         if (folder_pos != std::string::npos)
                                         {

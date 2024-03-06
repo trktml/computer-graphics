@@ -1,4 +1,4 @@
-#include "read_lsystem_from_file.h"
+#include "utils.h"
 
 LParser::LSystem2D read_lsystem_from_file(const ini::Configuration &configuration)
 {
@@ -34,4 +34,39 @@ LParser::LSystem2D read_lsystem_from_file(const ini::Configuration &configuratio
     lsystem_file.close();
 
     return l2d;
+}
+
+bool fix_file_path(std::string &filePath)
+{
+    // Is the file path empty?
+    if (filePath.empty())
+    {
+        throw "File path is empty!";
+        return false;
+    }
+
+    std::filesystem::path path(filePath);
+
+    // Fix the file path
+    filePath = std::filesystem::canonical(path).string();
+
+    return true;
+}
+
+bool createDirectory(const std::string &path)
+{
+#ifdef _WIN32
+    if (_mkdir(path.c_str()) != 0)
+    {
+        // std::cerr << "Error creating directory: " << path << std::endl;
+        return false;
+    }
+#else
+    if (mkdir(path.c_str(), 0777) != 0)
+    {
+        // std::cerr << "Error creating directory: " << path << std::endl;
+        return false;
+    }
+#endif
+    return true;
 }
